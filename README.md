@@ -1,2 +1,16 @@
-# drift_editor
+# drift_editor（縦書きPWA対応）
 流氷エディタ
+
+このプロジェクトは、青空文庫形式のテキストを縦書きで表示する最小構成のウェブアプリです。
+
+## 機能
+- writing-mode: vertical-rl による縦書きCSS
+- `<ruby>`タグによるルビ表示
+- `<em>`タグによる傍点（text-emphasis）
+- PWA対応：ホーム画面追加・オフライン表示（簡易）
+
+## 今後追加予定
+- Google Drive Picker対応
+- PWA対応
+- IndexedDBによるキャッシュ
+- 青空文庫形式パーサ
