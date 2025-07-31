@@ -89,3 +89,8 @@ main {
   padding: 0.5em 0;
   text-align: justify;
 }
+
+.emph {
+    -webkit-text-emphasis: sesame;
+    text-emphasis: sesame;
+}

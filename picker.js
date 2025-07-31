@@ -97,7 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fileId: currentFileId,
             alt: 'media'
         }).then(response => {
-            viewer.textContent = response.body;
+            let fulltext = parseAozora(response.body);
+            console.log(fulltext);
+            viewer.innerHTML = fulltext;
 
             const chars = parseInt(document.getElementById('charsPerLine').value, 10);
             if (!isNaN(chars)) {
@@ -160,7 +162,9 @@ function loadFileById(fileId) {
         alt: 'media'
     }).then(response => {
         const viewer = document.getElementById('viewer');
-        viewer.textContent = response.body;
+        let fulltext = parseAozora(response.body);
+        console.log(fulltext);
+        viewer.innerHTML = fulltext;
         // 文字数設定に従って幅を設定
         const charsPerLine = parseInt(document.getElementById('charsPerLine').value, 10) || 33;
         viewer.style.height = `${charsPerLine}ch`;
