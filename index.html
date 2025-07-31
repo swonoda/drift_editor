@@ -1,32 +1,66 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>流氷ビューア</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <script src="config.js"></script>
-  <script src="picker.js" defer></script>
-  <script src="pager.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流氷ビューア</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="config.js"></script>
+    <script src="picker.js"></script>
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </head>
 <body>
-  <aside id="menu">
-    <button id="pick">📂 ファイルを開く</button>
-    <button id="prev">⬅️ 前のページ</button>
-    <button id="next">➡️ 次のページ</button>
-  </aside>
-  <main>
-    <div id="viewer"></div>
-  </main>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        console.log("✅ Service Worker registered");
-      });
-    }
-  </script>
+    <aside id="menu">
+        <button id="toggleMenu">☰</button>
+        <div id="menuContent">
+            <button id="login">ログイン</button>
+            <button id="pick">📂</button>
+            <label>
+                1行の文字数：<input type="number" id="charsPerLine" value="20" min="10" max="80">
+            </label>
+            <button id="refresh">更新</button>
+        </div>
+    </aside>
+    <main>
+        <div id="viewer"></div>
+    </main>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log("✅ Service Worker registered");
+            });
+        }
+
+        // 横書きに変更
+        document.body.style.writingMode = 'horizontal-tb';
+
+        // メニュー開閉
+        const toggle = document.getElementById('toggleMenu');
+        const menuContent = document.getElementById('menuContent');
+        // toggle.addEventListener('click', () => {
+        //     menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
+        // });
+        // menuContent.style.display = 'none';
+
+        // 表示幅更新
+        const charsInput = document.getElementById('charsPerLine');
+        function updateViewerWidth() {
+            const value = parseInt(charsInput.value);
+            if (!isNaN(value)) {
+                document.getElementById('viewer').style.width = `calc(1em * ${value})`;
+                localStorage.setItem('charsPerLine', value);
+            }
+        }
+        charsInput.addEventListener('input', updateViewerWidth);
+
+        // ローカルストレージから復元
+        const saved = localStorage.getItem('charsPerLine');
+        if (saved) {
+            charsInput.value = saved;
+        }
+        updateViewerWidth();
+    </script>
 </body>
 </html>

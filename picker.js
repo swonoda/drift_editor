@@ -1,110 +1,175 @@
+// picker.js
+
 let tokenClient;
-let accessToken = null;
-let pickerInited = false;
+let gapiInited = false;
 let gisInited = false;
+let accessToken = null;
+let currentFileId = null;
 
-window.addEventListener("load", () => {
-  if (typeof google === "object" && google.accounts) {
-    gisLoaded();
-  } else {
-    const interval = setInterval(() => {
-      if (typeof google === "object" && google.accounts) {
-        clearInterval(interval);
-        gisLoaded();
-      }
-    }, 100);
-  }
+let loginButton;// = document.getElementById('login');
+let pickButton;// = document.getElementById('pick');
+let refreshButton;
 
-  if (typeof gapi !== "undefined") {
-    gapiLoaded();
-  } else {
-    const interval2 = setInterval(() => {
-      if (typeof gapi !== "undefined") {
-        clearInterval(interval2);
+document.addEventListener('DOMContentLoaded', () => {
+    pickButton = document.getElementById('pick');
+    pickButton.disabled = true;
+
+    loginButton = document.getElementById('login')
+    loginButton.disabled = true;
+
+    const token = localStorage.getItem('accessToken');
+    console.log(token);
+
+    refreshButton = document.getElementById('refresh');
+
+    if(token) {
         gapiLoaded();
-      }
-    }, 100);
-  }
-});
+        gisLoaded();
 
-document.getElementById("pick").addEventListener("click", () => {
-  if (!tokenClient) {
-    alert("Googleログインの準備がまだできていません。少し待ってからもう一度押してね！");
-    return;
-  }
-  if (accessToken) {
-    createPicker();
-  } else {
-    tokenClient.requestAccessToken();
-  }
+        gapiInited = true;
+        gisInited = true;
+
+        gapi.load('client:picker', () => {
+            gapi.client.init({ apiKey: CONFIG.API_KEY }).then(() => {
+                gapi.client.setToken({ access_token: token });
+
+                loginButton.style.display = 'none';
+                pickButton.style.display = 'inline-block';
+                pickButton.disabled = false;
+            });
+        });
+   
+        loginButton.style.display = 'none';
+        pickButton.style.display = 'inline-block';
+        pickButton.disabled = false;
+    }
+
+    loginButton.addEventListener('click', () => {
+        tokenClient.callback = (resp) => {
+            if (resp.error !== undefined) {
+                throw resp;
+            }
+
+            accessToken = resp.access_token;
+            localStorage.setItem('accessToken', accessToken);
+
+            loginButton.style.display = 'none';
+            pickButton.style.display = 'inline-block';
+            pickButton.disabled = false;
+        };
+
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    });
+
+    pickButton.addEventListener('click', () => {
+        console.log(token)
+        if(!accessToken && !token){
+            console.error("No access token");
+            return;
+        }
+        
+
+        const picker = new google.picker.PickerBuilder()
+            .addView(google.picker.ViewId.DOCS)
+            .setOAuthToken(gapi.client.getToken().access_token)
+            .setDeveloperKey(CONFIG.API_KEY)
+            .setCallback(pickerCallback)
+            .build();
+        picker.setVisible(true);
+
+        
+        // tokenClient.requestAccessToken({ prompt: '' });
+    });
+
+    // 入力値に応じてリアルタイムで幅変更
+    document.getElementById('charsPerLine').addEventListener('input', () => {
+        console.log("リアルタイム反映")
+        const chars = parseInt(document.getElementById('charsPerLine').value, 10);
+        if (!isNaN(chars)) {
+            viewer.style.height = `${chars}ch`;
+        }
+    });
+
+    refreshButton.addEventListener('click', ()=>{
+        if (!currentFileId) return;
+
+        gapi.client.drive.files.get({
+            fileId: currentFileId,
+            alt: 'media'
+        }).then(response => {
+            viewer.textContent = response.body;
+
+            const chars = parseInt(document.getElementById('charsPerLine').value, 10);
+            if (!isNaN(chars)) {
+                console.log(chars)
+                viewer.style.height = `${chars}ch`;
+            }
+        });
+    });
+
+    // ボタン取得後に初期化チェック
+    maybeEnableButton();
 });
 
 function gapiLoaded() {
-  gapi.load("client:picker", async () => {
-    pickerInited = true;
-    maybeEnablePicker();
-  });
+    gapi.load('client:picker', initializePicker);
 }
 
 function gisLoaded() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.CLIENT_ID,
-    scope: "https://www.googleapis.com/auth/drive.readonly",
-    callback: (tokenResponse) => {
-      if (tokenResponse.error) {
-        console.error(tokenResponse);
-        return;
-      }
-      accessToken = tokenResponse.access_token;
-      maybeEnablePicker();
-    },
-  });
-  gisInited = true;
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        callback: '',
+    });
+    gisInited = true;
+    maybeEnableButton();
 }
 
-function maybeEnablePicker() {
-  if (pickerInited && accessToken) {
-    createPicker();
-  }
+function initializePicker() {
+    gapi.client.init({
+        apiKey: CONFIG.API_KEY,
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    }).then(() => {
+        gapiInited = true;
+        maybeEnableButton();
+    });
 }
 
-function createPicker() {
-  const view = new google.picker.View(google.picker.ViewId.DOCS);
-  view.setMimeTypes("text/plain");
-
-  const picker = new google.picker.PickerBuilder()
-    .setAppId(CONFIG.APP_ID || "")
-    .setOAuthToken(accessToken)
-    .addView(view)
-    .setDeveloperKey(CONFIG.API_KEY)
-    .setCallback(pickerCallback)
-    .build();
-
-  picker.setVisible(true);
+function maybeEnableButton() {
+    if (gapiInited && gisInited && loginButton) {
+        loginButton.disabled = false;
+    }
 }
 
 function pickerCallback(data) {
-  if (data.action === google.picker.Action.PICKED) {
-    const fileId = data.docs[0].id;
-    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${CONFIG.API_KEY}`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    })
-    .then(response => {
-        if (!response.ok) {
-        throw new Error("📛 ファイルの取得に失敗しました（" + response.status + "）");
-        }
-        return response.text();
-    })
-    .then(text => {
-        console.log("📖 ファイル内容取得成功");
-        displayPages(text);
-    })
-    .catch(error => {
-        console.error("❌ 読み込みエラー:", error);
-        alert("ファイルの読み込みに失敗しました。形式が正しいか確認してください。");
-    });
-  }
+    if (data.action === google.picker.Action.PICKED) {
+        const file = data.docs[0];
+        const fileId = file.id;
+        currentFileId = fileId;
+
+        localStorage.setItem('lastOpenedFileId', fileId);
+        loadFileById(fileId)
+    } else {
+        console.warn('ファイルが選択されていないか、無効なレスポンスでした:', data);
+    }
 }
 
+function loadFileById(fileId) {
+    gapi.client.drive.files.get({
+        fileId: fileId,
+        alt: 'media'
+    }).then(response => {
+        const viewer = document.getElementById('viewer');
+        viewer.textContent = response.body;
+        // 文字数設定に従って幅を設定
+        const charsPerLine = parseInt(document.getElementById('charsPerLine').value, 10) || 33;
+        viewer.style.height = `${charsPerLine}ch`;
+        localStorage.setItem('lastOpenedFileId', fileId);
+    }, error => {
+        console.error('ファイル読み込みエラー:', error);
+    });
+}
+
+// 初期化用コールバックを登録
 window.gapiLoaded = gapiLoaded;
 window.gisLoaded = gisLoaded;
