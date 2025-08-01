@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pickButton.addEventListener('click', () => {
         console.log(token)
+        
         if(!accessToken && !token){
             console.error("No access token");
             return;
@@ -75,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .setDeveloperKey(CONFIG.API_KEY)
             .setCallback(pickerCallback)
             .build();
+
+        console.log(gapi.client.getToken().access_token)
+        console.log("Current scopes:", gapi.auth2?.getAuthInstance?.()?.currentUser?.get()?.getGrantedScopes?.());
         picker.setVisible(true);
 
         
@@ -98,12 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
             alt: 'media'
         }).then(response => {
             let fulltext = parseAozora(response.body);
-            console.log(fulltext);
             viewer.innerHTML = fulltext;
 
             const chars = parseInt(document.getElementById('charsPerLine').value, 10);
             if (!isNaN(chars)) {
-                console.log(chars)
                 viewer.style.height = `${chars}ch`;
             }
         });
@@ -123,6 +125,7 @@ function gisLoaded() {
         scope: 'https://www.googleapis.com/auth/drive.readonly',
         callback: '',
     });
+
     gisInited = true;
     maybeEnableButton();
 }
@@ -163,7 +166,6 @@ function loadFileById(fileId) {
     }).then(response => {
         const viewer = document.getElementById('viewer');
         let fulltext = parseAozora(response.body);
-        console.log(fulltext);
         viewer.innerHTML = fulltext;
         // 文字数設定に従って幅を設定
         const charsPerLine = parseInt(document.getElementById('charsPerLine').value, 10) || 33;

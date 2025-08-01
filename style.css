@@ -94,3 +94,8 @@ main {
     -webkit-text-emphasis: sesame;
     text-emphasis: sesame;
 }
+
+.highlight {
+    background-color: yellow;
+    padding: 0 2px;
+}

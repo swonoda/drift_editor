@@ -15,6 +15,6 @@ function parseAozora(text) {
 
     // ルビ変換
     text = text.replace(/｜(.*?)《(.*?)》/g, '<ruby>$1<rt>$2</rt></ruby>');
-    console.log(text);
+    
     return text;
 }

@@ -1,6 +1,6 @@
 {
-  "name": "青空文庫ビューア",
-  "short_name": "青空ビューア",
+  "name": "流氷ビューア",
+  "short_name": "流氷ビューア",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fefefe",
