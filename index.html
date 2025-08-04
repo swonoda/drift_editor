@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,20 +14,28 @@
     <script src="aozoraParser.js"></script>
     <script src="marker.js"></script>
 </head>
+
 <body>
-    <aside id="menu">
-        <button id="toggleMenu">☰</button>
-        <div id="menuContent">
-            <button id="login">ログイン</button>
-            <button id="pick">📂</button>
-            <label>
-                1行の文字数：<input type="number" id="charsPerLine" value="20" min="10" max="80">
-            </label>
-            <button id="refresh">更新</button>
-        </div>
-    </aside>
+    <!-- ハンバーガーボタン -->
+    <button id="toggleMenu">☰</button>
+    <div id="menu">
+        <h2>設定</h2>
+        <button id="login">ログイン</button>
+        <button id="pick">📂</button>
+        <label>
+            1行の文字数：<input type="number" id="charsPerLine" value="35" min="10" max="80">
+        </label>
+        <label>
+            fontサイズ：<input type="number" id="fontSize" value="12" min="10" max="80">
+        </label>
+        <button id="refresh">更新</button>
+    </div>
     <main>
         <div id="viewer"></div>
+        <div class="scroll-controls">
+            <button class="scroll-left">＜</button>
+            <button class="scroll-right">＞</button>
+        </div>
     </main>
     <script>
         if ('serviceWorker' in navigator) {
@@ -41,13 +50,10 @@
         // メニュー開閉
         const toggle = document.getElementById('toggleMenu');
         const menuContent = document.getElementById('menuContent');
-        // toggle.addEventListener('click', () => {
-        //     menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
-        // });
-        // menuContent.style.display = 'none';
+
 
         // 表示幅更新
-        const charsInput = document.getElementById('charsPerLine');
+        <!-- const charsInput = document.getElementById('charsPerLine');
         function updateViewerWidth() {
             const value = parseInt(charsInput.value);
             if (!isNaN(value)) {
@@ -55,7 +61,7 @@
                 localStorage.setItem('charsPerLine', value);
             }
         }
-        charsInput.addEventListener('input', updateViewerWidth);
+        charsInput.addEventListener('input', updateViewerWidth); -->
 
         // ローカルストレージから復元
         const saved = localStorage.getItem('charsPerLine');
@@ -67,4 +73,5 @@
         document.getElementById('markButton').addEventListener('click', addMarker);
     </script>
 </body>
+
 </html>

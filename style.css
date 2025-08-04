@@ -1,3 +1,4 @@
+/* === 基本レイアウト === */
 body {
   margin: 0;
   padding: 0;
@@ -7,72 +8,134 @@ body {
   background: #fefefe;
 }
 
-ruby rt {
-  font-size: 0.5em;
-  ruby-align: center;
-}
-
-em {
-  text-emphasis-style: filled dot;
-  text-emphasis-position: under;
-}
-
-article {
-  max-width: 90vw;
-  height: 90vh;
-  margin: auto;
-  background: #fff;
-}
-
-#menu {
-    width: 220px;
-    background-color: #f0f0f0;
-    padding: 1rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    border-right: 1px solid #ccc;
-}
-
-#menu label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: bold;
-}
-
-#menu input,
-#menu button {
-    width: 80%;
-    padding: 0.5rem;
-    font-size: 1rem;
-}
-
 main {
   flex: 1;
   overflow: auto;
   padding: 2em 1em;
 }
 
+header {
+  background: #333;
+  color: white;
+  padding: 1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* === ルビ・傍点など === */
+ruby rt {
+  font-size: 0.5em;
+  ruby-align: center;
+}
+
+em {
+  text-emphasis-style: filled sesame;
+  text-emphasis-position: under;
+}
+
+/* === メニュー切り替えボタン（ハンバーガー）=== */
+#toggleMenu {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 44px;
+  height: 44px;
+  z-index: 1100;
+  padding: 5px 10px;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.4s ease;
+}
+
+#toggleMenu.rotated {
+  transform: rotate(90deg);
+}
+
+#toggleMenu:hover {
+  background-color: #4cace4;
+}
+
+/* === メニューエリア（初期状態）=== */
+#menu {
+  width: 280px;
+  padding: 10px 10px 10px 10px;
+  background: #f5f5f5;
+  border-right: 1px solid #ccc;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  opacity: 0;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.3s ease;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* メニュー開いた状態 */
+#menu.open {
+  transform: translateX(0);
+  opacity: 0.9 !important;
+  pointer-events: auto;
+}
+
+/* メニュー内部スタイル */
+#menu label {
+  display: block;
+  margin-bottom: 0.25rem;
+  margin-top: 0.5rem;
+  margin-left: 1rem;
+}
+
+#menu input,
+#menu button {
+  width: 30%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 0px;
+  margin-top: 0.5rem;
+  margin-left: 1rem;
+}
+
+#menu button:hover {
+  background-color: #4cace4;
+  color: #fff;
+}
+
+#menu h2 {
+  margin-top: 20px;
+  padding-top: 20px;
+  font-weight: normal;
+  font-size: 90%;
+  color: #3e3e3e;
+  line-height: 3em;
+}
+
+/* === ビューア領域 === */
 #viewer {
-  display:block;
+  display: block;
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-family: "游明朝", YuMincho, serif;
   line-height: 2.2;
-  font-size: 20px;
-  padding: 1em;
-  padding-top: 2em;
-  padding-bottom: 2em;
-  max-height: 90vw;
+  font-size: 15px;
+  padding: 2em 1em;
+  max-height: 90vh;
   margin: auto;
   background: white;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
-  width: auto !important;
-  height: 40vh;
+  max-width: 60ch;
+  min-width: 35ch;
+  height: 90vh;
   white-space: pre-wrap;
   overflow-x: auto;
-  overflow-wrap:break-word;
+  overflow-wrap: break-word;
   word-break: break-word;
 }
 
@@ -91,11 +154,57 @@ main {
 }
 
 .emph {
-    -webkit-text-emphasis: sesame;
-    text-emphasis: sesame;
+  -webkit-text-emphasis: sesame;
+  text-emphasis: sesame;
 }
 
 .highlight {
-    background-color: yellow;
-    padding: 0 2px;
+  background-color: yellow;
+  padding: 0 2px;
+}
+
+/* === レスポンシブ対応 === */
+@media (min-width: 768px) {
+
+  /* PC時もメニューは閉じた状態で開始 */
+  #menu {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  #menu.open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.scroll-controls {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.scroll-controls button {
+  color: #3e3e3e;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.scroll-left {
+  left: 10px;
+  position: fixed;
+}
+
+.scroll-right {
+  right: 10px;
+  position: fixed;
 }

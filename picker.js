@@ -10,6 +10,10 @@ let loginButton;// = document.getElementById('login');
 let pickButton;// = document.getElementById('pick');
 let refreshButton;
 
+const menuToggle = document.getElementById('toggleMenu');
+const menu = document.getElementById('menu');
+const fontSizeInput = document.getElementById('fontSize');
+
 document.addEventListener('DOMContentLoaded', () => {
     pickButton = document.getElementById('pick');
     pickButton.disabled = true;
@@ -22,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshButton = document.getElementById('refresh');
 
-    if(token) {
+    if (token) {
         gapiLoaded();
         gisLoaded();
 
@@ -38,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 pickButton.disabled = false;
             });
         });
-   
+
         loginButton.style.display = 'none';
         pickButton.style.display = 'inline-block';
         pickButton.disabled = false;
@@ -63,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pickButton.addEventListener('click', () => {
         console.log(token)
-        
-        if(!accessToken && !token){
+
+        if (!accessToken && !token) {
             console.error("No access token");
             return;
         }
-        
+
 
         const picker = new google.picker.PickerBuilder()
             .addView(google.picker.ViewId.DOCS)
@@ -81,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Current scopes:", gapi.auth2?.getAuthInstance?.()?.currentUser?.get()?.getGrantedScopes?.());
         picker.setVisible(true);
 
-        
+
         // tokenClient.requestAccessToken({ prompt: '' });
     });
 
@@ -94,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    refreshButton.addEventListener('click', ()=>{
+    refreshButton.addEventListener('click', () => {
         if (!currentFileId) return;
 
         gapi.client.drive.files.get({
@@ -108,6 +112,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isNaN(chars)) {
                 viewer.style.height = `${chars}ch`;
             }
+        });
+    });
+
+    // フォントサイズ変更
+    document.getElementById('fontSize').addEventListener('input', () => {
+        const size = parseInt(document.getElementById('fontSize').value, 10);
+        console.log(size)
+        if (!isNaN(size)) {
+            viewer.style.fontSize = `${size}px`;
+        }
+    });
+
+    // メニューの開閉
+    document.getElementById('toggleMenu').addEventListener('click', () => {
+        console.log("toggle menu")
+        document.getElementById('menu').classList.toggle('open');
+        document.getElementById('toggleMenu').classList.toggle('rotated');
+    });
+
+    // 横スクロール操作ボタンの処理
+    document.querySelectorAll('.scroll-left').forEach(button => {
+        console.log("scroll left");
+        button.addEventListener('click', () => {
+            viewer.scrollBy({ left: -100, behavior: 'smooth' });
+        });
+    });
+
+    document.querySelectorAll('.scroll-right').forEach(button => {
+        console.log("scroll right");
+        button.addEventListener('click', () => {
+            viewer.scrollBy({ left: 100, behavior: 'smooth' });
         });
     });
 
