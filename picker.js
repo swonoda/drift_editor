@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginButton = document.getElementById('login')
     loginButton.disabled = true;
 
-    const token = localStorage.getItem('accessToken');
+    const token = sessionStorage.getItem('accessToken');
     console.log(token);
 
     refreshButton = document.getElementById('refresh');
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             accessToken = resp.access_token;
-            localStorage.setItem('accessToken', accessToken);
+            sessionStorage.setItem('accessToken', accessToken);
 
             loginButton.style.display = 'none';
             pickButton.style.display = 'inline-block';
@@ -187,7 +187,7 @@ function pickerCallback(data) {
         const fileId = file.id;
         currentFileId = fileId;
 
-        localStorage.setItem('lastOpenedFileId', fileId);
+        sessionStorage.setItem('lastOpenedFileId', fileId);
         loadFileById(fileId)
     } else {
         console.warn('ファイルが選択されていないか、無効なレスポンスでした:', data);
@@ -205,7 +205,7 @@ function loadFileById(fileId) {
         // 文字数設定に従って幅を設定
         const charsPerLine = parseInt(document.getElementById('charsPerLine').value, 10) || 33;
         viewer.style.height = `${charsPerLine}ch`;
-        localStorage.setItem('lastOpenedFileId', fileId);
+        sessionStorage.setItem('lastOpenedFileId', fileId);
     }, error => {
         console.error('ファイル読み込みエラー:', error);
     });
